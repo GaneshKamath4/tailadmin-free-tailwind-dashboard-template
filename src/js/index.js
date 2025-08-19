@@ -1,7 +1,4 @@
-import "jsvectormap/dist/jsvectormap.min.css";
-import "flatpickr/dist/flatpickr.min.css";
-import "dropzone/dist/dropzone.css";
-import "../output.css";
+// If you serve statically without bundling, include these via <link> tags in HTML if needed.
 
 import Alpine from "alpinejs";
 import persist from "@alpinejs/persist";

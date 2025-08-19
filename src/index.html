@@ -10,6 +10,10 @@
     <title>
       eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template
     </title>
+    <link rel="stylesheet" href="./output.css" />
+    <link rel="stylesheet" href="https://unpkg.com/flatpickr/dist/flatpickr.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/jsvectormap/dist/jsvectormap.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/dropzone/dist/dropzone.css" />
   </head>
   <body
     x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
@@ -23,7 +27,7 @@
     <!-- ===== Page Wrapper Start ===== -->
     <div class="flex h-screen overflow-hidden">
       <!-- ===== Sidebar Start ===== -->
-      <include src="./partials/sidebar.html"></include>
+      <aside id="sidebar-root"></aside>
       <!-- ===== Sidebar End ===== -->
 
       <!-- ===== Content Area Start ===== -->
@@ -33,7 +37,7 @@
         
 
         <!-- ===== Header Start ===== -->
-        <include src="./partials/header.html" />
+        <header id="header-root"></header>
         <!-- ===== Header End ===== -->
 
         <!-- ===== Main Content Start ===== -->
@@ -47,5 +51,60 @@
       <!-- ===== Content Area End ===== -->
     </div>
     <!-- ===== Page Wrapper End ===== -->
+    <script type="module">
+      import Alpine from 'https://esm.sh/alpinejs@3.14.1'
+      import persist from 'https://esm.sh/@alpinejs/persist@3.14.1'
+      import flatpickr from 'https://esm.sh/flatpickr@4.6.13'
+      import Dropzone from 'https://esm.sh/dropzone@6.0.0-beta.2'
+      Alpine.plugin(persist)
+      window.Alpine = Alpine
+      Alpine.start()
+
+      // Init flatpickr
+      flatpickr('.datepicker', {
+        mode: 'range',
+        static: true,
+        monthSelectorType: 'static',
+        dateFormat: 'M j, Y',
+        defaultDate: [new Date().setDate(new Date().getDate() - 6), new Date()],
+        prevArrow:
+          '<svg class="stroke-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.25 6L9 12.25L15.25 18.5" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        nextArrow:
+          '<svg class="stroke-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.75 19L15 12.75L8.75 6.5" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        onReady: (selectedDates, dateStr, instance) => {
+          instance.element.value = dateStr.replace('to', '-')
+          const customClass = instance.element.getAttribute('data-class')
+          instance.calendarContainer.classList.add(customClass)
+        },
+        onChange: (selectedDates, dateStr, instance) => {
+          instance.element.value = dateStr.replace('to', '-')
+        },
+      })
+
+      // Init Dropzone (if present)
+      const dropzoneArea = document.querySelectorAll('#demo-upload')
+      if (dropzoneArea.length) {
+        // eslint-disable-next-line no-new
+        new Dropzone('#demo-upload', { url: '/file/post' })
+      }
+
+      // Inject partials
+      (function () {
+        async function inject(id, url) {
+          try {
+            const res = await fetch(url);
+            const html = await res.text();
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = html;
+          } catch (e) {
+            console.error('Failed to load', url, e);
+          }
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+          inject('sidebar-root', './partials/sidebar.html');
+          inject('header-root', './partials/header.html');
+        });
+      })();
+    </script>
   </body>
 </html>
